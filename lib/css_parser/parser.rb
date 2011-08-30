@@ -65,13 +65,33 @@ module CssParser
     #  find_by_selector('#content', :print)
     #  => 'font-size: 11pt; line-height: 1.2;'
     #
-    # Returns an array of declarations.
+    # Now you can use Regexp too
+    #
+    # ==== Examples
+    #  find_by_selector('/#content/')
+    #  => 'font-size: 13px; line-height: 1.2;'
+    #
+    #  find_by_selector('/\.content/') # Don't forget use escape with dot(\)
+    #  => 'float:left;'
+    #
+    #  find_by_selector('/content/')
+    #  => {'#content' => {'font-size' => '11pt;', 'line-height' => '1.2;'}, '.content' => {'float' => 'left'}}
+    #
+    # Returns an array or hash of declarations.
     def find_by_selector(selector, media_types = :all)
-      out = []
+      out       = []
+      out_hash  = {}
+      
       each_selector(media_types) do |sel, dec, spec|
-        out << dec if sel.strip == selector.strip
+        if selector.is_a?(Regexp)
+          dec_hash = {}
+          dec.split(';').map{|x| dec_hash.merge!({x.split(':').first.lstrip => x.split(":").last.lstrip})}
+          out_hash.merge!({sel => dec_hash}){ |key, v1, v2| "#{v1} #{v2}"} if sel.strip =~ selector
+        elsif selector.is_a?(String)
+          out << dec if sel.strip == selector.strip;
+        end        
       end
-      out
+      selector.is_a?(Regexp) ? (out_hash.size < 2 ? out_hash.values : out_hash) : out
     end
     alias_method :[], :find_by_selector
 

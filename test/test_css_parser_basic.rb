@@ -20,6 +20,14 @@ class CssParserBasicTests < Test::Unit::TestCase
     assert_equal 'margin: 0px; padding: 0px;', @cp.find_by_selector('p').join(' ')
     assert_equal 'font: 12px/normal sans-serif;', @cp.find_by_selector('#content').join(' ')
     assert_equal 'color: red;', @cp.find_by_selector('.content').join(' ')
+    
+    assert_equal 'margin: 0px;', @cp.find_by_selector(/body/).join(' ')
+    assert_equal 'margin: 0px; padding: 0px;', @cp.find_by_selector(/p/).join(' ')
+    assert_equal 'font: 12px/normal sans-serif;', @cp.find_by_selector(/#content/).join(' ')
+    assert_equal 'color: red;', @cp.find_by_selector(/\.content/).join(' ')
+    
+    hash = {"#content" => {"font" => "12px/normal sans-serif;"}, ".content" => {"color" => "red;"}}
+    assert_equal hash, @cp.find_by_selector(/content/)
   end
 
   def test_adding_block
